@@ -464,8 +464,13 @@ static void handle_tool_axis(struct wl_listener *listener, void *data) {
 	wlr_cursor_absolute_to_layout_coords(cursor->cursor, event->device,
 			x, y, &lx, &ly);
 
-	double dx = lx - cursor->cursor->x;
-	double dy = ly - cursor->cursor->y;
+	double dx = 0, dy = 0;
+	if (!isnan(lx)) {
+		dx = lx - cursor->cursor->x;
+	}
+	if (!isnan(ly)) {
+		dy = ly - cursor->cursor->y;
+	}
 
 	cursor_motion(cursor, event->time_msec, event->device, dx, dy, dx, dy);
 	wlr_seat_pointer_notify_frame(cursor->seat->wlr_seat);
