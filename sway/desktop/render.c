@@ -999,6 +999,7 @@ void output_render(struct sway_output *output, struct timespec *when,
 
 	struct sway_workspace *workspace = output->current.active_workspace;
 	if (workspace == NULL) {
+		sway_log(SWAY_ERROR, "HOU HOU HOU");
 		return;
 	}
 
