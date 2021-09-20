@@ -12,6 +12,7 @@
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_output_swapchain.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/util/region.h>
@@ -529,13 +530,15 @@ static int output_repaint_timer_handler(void *data) {
 		}
 	}
 
+	int buffer_age;
+	if (!wlr_output_swapchain_begin(output->swapchain, &buffer_age)) {
+		return 0;
+	}
+
 	bool needs_frame;
 	pixman_region32_t damage;
 	pixman_region32_init(&damage);
-	if (!wlr_output_damage_attach_render(output->damage,
-			&needs_frame, &damage)) {
-		return 0;
-	}
+	wlr_output_damage_step(output->damage, buffer_age, &needs_frame, &damage);
 
 	if (needs_frame) {
 		struct timespec now;
@@ -543,6 +546,7 @@ static int output_repaint_timer_handler(void *data) {
 
 		output_render(output, &now, &damage);
 	} else {
+		wlr_output_swapchain_end(output->swapchain);
 		wlr_output_rollback(output->wlr_output);
 	}
 
@@ -856,6 +860,8 @@ void handle_new_output(struct wl_listener *listener, void *data) {
 	}
 	output->server = server;
 	output->damage = wlr_output_damage_create(wlr_output);
+	output->swapchain = wlr_output_swapchain_create(
+		server->output_swapchain_manager, wlr_output);
 
 	wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 	output->destroy.notify = handle_destroy;

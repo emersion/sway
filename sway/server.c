@@ -20,6 +20,7 @@
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
+#include <wlr/types/wlr_output_swapchain.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_server_decoration.h>
@@ -73,9 +74,13 @@ static void handle_drm_lease_request(struct wl_listener *listener, void *data) {
 bool server_init(struct sway_server *server) {
 	sway_log(SWAY_DEBUG, "Initializing Wayland server");
 
-	struct wlr_renderer *renderer = wlr_backend_get_renderer(server->backend);
-	assert(renderer);
+	server->output_swapchain_manager =
+		wlr_output_swapchain_manager_autocreate(server->backend);
+	if (server->output_swapchain_manager == NULL) {
+		return false;
+	}
 
+	struct wlr_renderer *renderer = server->output_swapchain_manager->renderer;
 	wlr_renderer_init_wl_display(renderer, server->wl_display);
 
 	server->compositor = wlr_compositor_create(server->wl_display, renderer);

@@ -36,6 +36,8 @@ struct sway_server {
 	// secondary headless backend used for creating virtual outputs on-the-fly
 	struct wlr_backend *headless_backend;
 
+	struct wlr_output_swapchain_manager *output_swapchain_manager;
+
 	struct wlr_compositor *compositor;
 	struct wl_listener compositor_new_surface;
 

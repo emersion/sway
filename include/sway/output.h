@@ -27,6 +27,7 @@ struct sway_output {
 
 	struct timespec last_frame;
 	struct wlr_output_damage *damage;
+	struct wlr_output_swapchain *swapchain;
 
 	int lx, ly; // layout coords
 	int width, height; // transformed buffer size
